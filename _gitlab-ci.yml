@@ -1,0 +1,24 @@
+stages:
+  - build
+  - deploy
+
+docker-build:
+  stage: build
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker build --pull --build-arg RABBITMQ_VERSION=$RABBITMQ_VERSION -t ${CI_REGISTRY_IMAGE}:${RABBITMQ_VERSION} .
+    - docker push ${CI_REGISTRY_IMAGE}
+  only:
+    - master
+
+deploy-to-test:
+  stage: deploy
+  variables:
+    DOCKER_HOST: tcp://${TEST_HOST}:2375
+  script:
+    - echo $CI_DEPLOY_PASSWORD | docker login -u $CI_DEPLOY_USER --password-stdin $CI_REGISTRY
+    - docker stack deploy --with-registry-auth --compose-file=docker-compose.yml amq
+  environment:
+    name: test
+  only:
+    - master

@@ -1,0 +1,16 @@
+version: "3.3"
+
+services:
+  rabbitmq-broker:
+    image: ${CI_REGISTRY_IMAGE}:${RABBITMQ_VERSION}
+    environment:
+      - RABBITMQ_DEFAULT_USER=$RABBITMQ_USER
+      - RABBITMQ_DEFAULT_PASS=$RABBITMQ_PASSWORD
+    ports:
+      - 15672:15672
+      - 4369:4369
+      - 5671:5671
+      - 5672:5672
+      - 25672:25672
+    deploy:
+      replicas: ${RABBITMQ_REPLICAS:-1}
